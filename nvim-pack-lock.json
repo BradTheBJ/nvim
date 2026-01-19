@@ -20,6 +20,10 @@
       "rev": "bf5d5eaf23bbfcca9f98a24ed29bd084abf89bf2",
       "src": "https://github.com/chomosuke/typst-preview.nvim"
     },
+    "ultimate-autopair.nvim": {
+      "rev": "72e160cb1ce8c0db2ac4315f77d97420a2f4223d",
+      "src": "https://github.com/altermo/ultimate-autopair.nvim"
+    },
     "vague.nvim": {
       "rev": "fcc283576764474ccfbbcca240797d5d7f4d8a78",
       "src": "https://github.com/vague2k/vague.nvim"
