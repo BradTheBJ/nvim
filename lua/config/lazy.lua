@@ -1,3 +1,6 @@
+-- lazy.lua
+
+-- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
     local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -16,6 +19,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Global options
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
@@ -27,8 +31,14 @@ vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.wrap = false
 
+-- Keymaps
+vim.keymap.set('n', '<leader>w', function() vim.cmd('write') end, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>q', function() vim.cmd('quit') end, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>t', function() vim.cmd('Telescope find_files') end, { noremap = true, silent = true })
+-- Plugin setup
 require("lazy").setup({
     spec = {
+        -- Colorscheme
         {
             "rebelot/kanagawa.nvim",
             config = function()
@@ -36,11 +46,11 @@ require("lazy").setup({
                 vim.cmd("colorscheme kanagawa")
             end,
         },
+
+        -- Mason and LSP
         {
             "williamboman/mason.nvim",
-            config = function()
-                require("mason").setup()
-            end,
+            config = function() require("mason").setup() end,
         },
         {
             "williamboman/mason-lspconfig.nvim",
@@ -70,6 +80,8 @@ require("lazy").setup({
                 ]]
             end,
         },
+
+        -- Treesitter
         {
             "nvim-treesitter/nvim-treesitter",
             build = ":TSUpdate",
@@ -87,8 +99,88 @@ require("lazy").setup({
                 })
             end,
         },
+
+        -- Telescope
+        {
+            'nvim-telescope/telescope.nvim', version = '*',
+            dependencies = {
+                'nvim-lua/plenary.nvim',
+                { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+            },
+        },
+
+        -- nvim-cmp and completion
+        {
+            "hrsh7th/nvim-cmp",
+            dependencies = {
+                "hrsh7th/cmp-nvim-lsp",
+                "hrsh7th/cmp-buffer",
+                "hrsh7th/cmp-path",
+                "hrsh7th/cmp-cmdline",
+                "L3MON4D3/LuaSnip",
+                "saadparwaiz1/cmp_luasnip",
+            },
+            config = function()
+                local cmp = require("cmp")
+                local luasnip = require("luasnip")
+
+                cmp.setup({
+                    snippet = {
+                        expand = function(args)
+                            luasnip.lsp_expand(args.body)
+                        end,
+                    },
+                    mapping = cmp.mapping.preset.insert({
+                        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+                        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+                        ["<C-Space>"] = cmp.mapping.complete(),
+                        ["<C-e>"] = cmp.mapping.abort(),
+                        ["<CR>"] = cmp.mapping.confirm({ select = true }),
+                        ["<Tab>"] = cmp.mapping(function(fallback)
+                            if cmp.visible() then
+                                cmp.select_next_item()
+                            elseif luasnip.expand_or_jumpable() then
+                                luasnip.expand_or_jump()
+                            else
+                                fallback()
+                            end
+                        end, { "i", "s" }),
+                        ["<S-Tab>"] = cmp.mapping(function(fallback)
+                            if cmp.visible() then
+                                cmp.select_prev_item()
+                            elseif luasnip.jumpable(-1) then
+                                luasnip.jump(-1)
+                            else
+                                fallback()
+                            end
+                        end, { "i", "s" }),
+                    }),
+                    sources = cmp.config.sources({
+                        { name = "nvim_lsp" },
+                        { name = "luasnip" },
+                    }, {
+                        { name = "buffer" },
+                        { name = "path" },
+                    }),
+                })
+
+                -- Command-line completion
+                cmp.setup.cmdline("/", {
+                    mapping = cmp.mapping.preset.cmdline(),
+                    sources = { { name = "buffer" } },
+                })
+                cmp.setup.cmdline(":", {
+                    mapping = cmp.mapping.preset.cmdline(),
+                    sources = cmp.config.sources({
+                        { name = "path" }
+                    }, {
+                        { name = "cmdline" }
+                    }),
+                })
+            end,
+        },
     },
+
     install = { colorscheme = { "habamax" } },
     checker = { enabled = true },
 })
-
