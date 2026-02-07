@@ -27,16 +27,6 @@ vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.wrap = false
 
-vim.keymap.set('n', '<leader>s', function()
-    if vim.fn.expand('%') ~= '' then
-        vim.cmd('write')
-    else
-        vim.api.nvim_echo({{'Buffer has no name, cannot save', 'WarningMsg'}}, true, {})
-    end
-end, { noremap = true, silent = true })
-
-vim.keymap.set('n', '<leader>q', ':quit<CR>')
-
 require("lazy").setup({
     spec = {
         {
@@ -56,7 +46,7 @@ require("lazy").setup({
             "williamboman/mason-lspconfig.nvim",
             config = function()
                 require("mason-lspconfig").setup({
-                    ensure_installed = { "clangd", "pyright", "luals" },
+                    ensure_installed = { "clangd", "pyright" },
                 })
             end,
         },
@@ -64,8 +54,37 @@ require("lazy").setup({
             "neovim/nvim-lspconfig",
             config = function()
                 local lspconfig = require("lspconfig")
+
                 lspconfig.clangd.setup{}
                 lspconfig.pyright.setup{}
+
+                vim.diagnostic.config({
+                    virtual_text = { spacing = 2, prefix = "●" },
+                    signs = true,
+                    underline = true,
+                    update_in_insert = false,
+                })
+
+                vim.cmd [[
+                    autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, { focusable = false })
+                ]]
+            end,
+        },
+        {
+            "nvim-treesitter/nvim-treesitter",
+            build = ":TSUpdate",
+            lazy = false,
+            config = function()
+                local ok, tsconfigs = pcall(require, "nvim-treesitter.configs")
+                if not ok then return end
+
+                tsconfigs.setup({
+                    ensure_installed = { "go", "lua", "c", "cpp", "zig", "python" },
+                    highlight = { enable = true },
+                    indent = { enable = true },
+                    incremental_selection = { enable = true },
+                    textobjects = { enable = true },
+                })
             end,
         },
     },
