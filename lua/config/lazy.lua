@@ -1,5 +1,3 @@
--- lazy.lua
-
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -35,6 +33,7 @@ vim.opt.wrap = false
 vim.keymap.set('n', '<leader>w', function() vim.cmd('write') end, { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>q', function() vim.cmd('quit') end, { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>t', function() vim.cmd('Telescope find_files') end, { noremap = true, silent = true })
+
 -- Plugin setup
 require("lazy").setup({
     spec = {
@@ -164,7 +163,6 @@ require("lazy").setup({
                     }),
                 })
 
-                -- Command-line completion
                 cmp.setup.cmdline("/", {
                     mapping = cmp.mapping.preset.cmdline(),
                     sources = { { name = "buffer" } },
@@ -177,6 +175,14 @@ require("lazy").setup({
                         { name = "cmdline" }
                     }),
                 })
+            end,
+        },
+
+        -- Autoclose.nvim
+        {
+            "m4xshen/autoclose.nvim",
+            config = function()
+                require("autoclose").setup()
             end,
         },
     },
